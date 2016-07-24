@@ -1,351 +1,43 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+	<meta charset="UTF-8">
 	<title>3T</title>
-	<script src="plugins/jquery-1.11.0.min.js"></script>
-	<script src="plugins/peer.js"></script>
-	
-	<style type="text/css">
-		@font-face{
-			font-family:lolol;
-			src:url(resources/andy.ttf);
-		}
-		
-		html, body{
-			margin:0px;
-			padding:0px;
-			background:#eee;
-			color:#334;
-			font-family:Calibri;
-		}
-		
-		h1{
-			font-family:lolol;
-			font-size:50pt;
-			margin:5px 0px 0px 0px;
-		}
-		
-		table{
-			background:#ddd;
-			border-radius:3px;
-			border:1px solid rgba(0,0,0,0.1);
-			box-shadow:0px 0px 20px rgba(0,0,0,0.1), inset 0px 1px 0px rgba(255,255,255,0.5);
-			table-layout:fixed;
-			margin:15px auto;
-		}
-		
-		td{
-			border-radius:3px;
-			cursor:pointer;
-			box-shadow:inset 0px 1px 2px rgba(0,0,0,0.1), inset 0px 0px 3px rgba(0,0,0,0.25),0px 1px 1px rgba(255,255,255,0.7);
-		}
-		
-		button{
-			background:#e0e0e0;
-			border:1px solid rgba(0,0,0,0.1);
-			border-radius:3px;
-			padding:10px 20px;
-			cursor:pointer;
-			box-shadow:0px 0px 10px rgba(0,0,0,0.05), inset 0px 1px 0px rgba(255,255,255,1);
-		}
-		
-		input{
-			background:#f9f9f9;
-			border:1px solid rgba(0,0,0,0.1);
-			border-radius:3px;
-			padding:10px 20px;
-			box-shadow:0px 0px 10px rgba(0,0,0,0.05), inset 0px 1px 0px rgba(255,255,255,1);
-		}
-		
-		.cross{
-			background:url('images/cross.png') 50% no-repeat;
-			background-color:#cdd;
-			cursor:default;
-			-webkit-animation: crossFadeIn 0.4s;
-		}
-		
-		.circle{
-			background:url('images/circle.png') 50% no-repeat;
-			background-color:#cea;
-			cursor:default;
-			-webkit-animation: circleFadeIn 0.4s;
-		}
-		
-		@-webkit-keyframes crossFadeIn{
-			0%	 {background-color:#ddd;}
-			100% {background-color:#cdd;}
-		}
-		
-		@-webkit-keyframes circleFadeIn{
-			0%	 {background-color:#ddd;}
-			100% {background-color:#cea;}
-		}
-		
-		#msgBoard{
-			height:calc(400px - (60px * 2));
-			width:400px;
-			margin:0px calc(800px - 75%);
-			padding:60px 0px;
-			position:absolute;
-			top:0px;
-			background:rgba(250,250,250,0.9);
-			border-radius:3px;
-			text-align:center;
-			visibility:hidden;
-			opacity:0;
-			transition:all 0.5s;
-		}
-	</style>
-	
-	<script type="text/javascript">
-		var conn;
-		//var peer = new Peer({key: 'p3t3r63', host: 'localhost', port: 9000, path: './', debug: 3});
-		var peer = new Peer({key: '41d2uxazy7kl0udi', debug: 3});
-		
-		peer.on('open', function(id){
-			$('#yid').text(id);
-		});
-		
-		peer.on('connection', connect);	
-		
-		function connect(c) {
-			conn = c;
-			conn.on('data', function(data){
-				$('#'+data).click();
-			});
-			conn.on('close', function(err){ alert(conn.peer + ' disconnected.') });
-		}
-	
-		$(function(){
-			// Conect to a peer
-			$('#connect').click(function(){
-				var c = peer.connect($.trim($('#pid').val()));
-				c.on('open', function(){
-					connect(c);
-				});
-				c.on('error', function(err){ alert(err) });  
-			});
-			
-			$score = new Array;
-			$score['x'] = 0;
-			$score['o'] = 0;
-			updateScore();
-			
-			resetGame();
-		
-			$(window).keypress(function(event) {
-				//ENTER
-				if ($isEndOfGame == true && event.which == 13){
-					resetGame();
-				}
-				
-				// QWEASDZXC
-				switch(event.which){
-					case 122:
-						$('#x1y3').click();
-						break;
-					case 120:
-						$('#x2y3').click();
-						break;
-					case 99:
-						$('#x3y3').click();
-						break;
-					case 97:
-						$('#x1y2').click();
-						break;
-					case 115:
-						$('#x2y2').click();
-						break;
-					case 100:
-						$('#x3y2').click();
-						break;
-					case 113:
-						$('#x1y1').click();
-						break;
-					case 119:
-						$('#x2y1').click();
-						break;
-					case 101:
-						$('#x3y1').click();
-						break;
-				}
-			
-				// NUMPAD
-				switch(event.which){
-					case 49:
-						$('#x1y3').click();
-						break;
-					case 50:
-						$('#x2y3').click();
-						break;
-					case 51:
-						$('#x3y3').click();
-						break;
-					case 52:
-						$('#x1y2').click();
-						break;
-					case 53:
-						$('#x2y2').click();
-						break;
-					case 54:
-						$('#x3y2').click();
-						break;
-					case 55:
-						$('#x1y1').click();
-						break;
-					case 56:
-						$('#x2y1').click();
-						break;
-					case 57:
-						$('#x3y1').click();
-						break;
-				}
-			})
-			
-			$('td').click(function(){				
-				if(!$isEndOfGame){
-					$id = this.id;
-					conn.send($id);
-					
-					if(typeof $coords[$id] == 'undefined') {
-						$coords[$id] = $player;
-						
-						$id = '#' + $id;
-						
-						if ( $playerCount == 0 ){
-							$($id).addClass("cross");
-							$playerCount ++;
-						} else if( $playerCount == 1 ){
-							$($id).addClass("circle");
-							$playerCount = 0;
-						}
-						
-						$playsCount++;
-						
-						if (checkWin() != false){
-							if (checkWin() == 'x' || checkWin() == 'o'){
-								$isEndOfGame = true;
-								++$score[checkWin()];
-								updateScore();
-								$newGameBtn = '<br /><button onClick="resetGame();" style="bottom:20px;">New Game</button>';
-								$('#msgBoard').prepend('<h1 style="color:#666; font-size:50pt;">'+$player.toUpperCase()+' wins!</h1>'+$newGameBtn);
-								$('#msgBoard').css('visibility', 'visible');
-								$('#msgBoard').css('opacity', '1');
-							}
-						}
-						else if (checkWin() == false && $playsCount >= 9){
-							$isEndOfGame = true;
-							$newGameBtn = '<br /><button onClick="resetGame();" style="bottom:20px;">New Game</button>';
-							$msgBoardContent = '<span style="color:#666;">YOU BOTH LOSERS!!!1!!11!</span>' + $newGameBtn;
 
-							$('#msgBoard').prepend($msgBoardContent);
-							
-							$('#msgBoard').css('visibility', 'visible');
-							$('#msgBoard').css('opacity', '1');
-						}
-						playersTurn();
-					}
-				}
-			});
-		});
-		
-		function resetGame(){
-			for (var y=1; y<=3 ; y++){
-				for (var x=1; x<=3; x++){
-					$('#x' + x + 'y' + y).removeClass();
-				}
-			}
-			
-			$playerCount = 0;
-			$playsCount = 0;
-			playersTurn();
-			$coords = new Array();
-			$('#msgBoard').css('visibility', 'hidden');
-			$('#msgBoard').css('opacity', '0');
-			$('#msgBoard').html('');
-			updateScore();
-			$isEndOfGame = false;
-		}
-		
-		function playersTurn(){
-			if ( $playerCount == 0 ){
-				$('#playersTurn').text('Cross');
-				$player = 'x';
-			} else if( $playerCount == 1 ){
-				$('#playersTurn').text('Circle');
-				$player = 'o';
-			}
-		}
-		
-		function checkWin(){
-			//HORIZONTAL
-			if ($coords['x1y1'] == $player && $coords['x2y1'] == $player && $coords['x3y1'] == $player){
-				return $player;
-				//alert($player + ' wins');
-			}
-			else if ($coords['x1y2'] == $player && $coords['x2y2'] == $player && $coords['x3y2'] == $player){
-				return $player;
-			}
-			else if ($coords['x1y3'] == $player && $coords['x2y3'] == $player && $coords['x3y3'] == $player){
-				return $player;
-			}
-			
-			//VERTICAL
-			else if ($coords['x1y1'] == $player && $coords['x1y2'] == $player && $coords['x1y3'] == $player){
-				return $player;
-			}
-			else if ($coords['x2y1'] == $player && $coords['x2y2'] == $player && $coords['x2y3'] == $player){
-				return $player;
-			}
-			else if ($coords['x3y1'] == $player && $coords['x3y2'] == $player && $coords['x3y3'] == $player){
-				return $player;
-			}
-			
-			//DIAG
-			else if ($coords['x1y1'] == $player && $coords['x2y2'] == $player && $coords['x3y3'] == $player){
-				return $player;
-			}
-			else if ($coords['x3y1'] == $player && $coords['x2y2'] == $player && $coords['x1y3'] == $player){
-				return $player;
-			}
-			
-			else {
-				return false;
-			}
-		}
-		
-		function updateScore(){
-			$('#xscore').text($score['x']);
-			$('#oscore').text($score['o']);
-			
-			$('#xscore').css('transition', 'all 2s');
-			$('#oscore').css('transition', 'all 2s');
-			
-			if ($score['x'] > $score['o']){
-				$('#xscore').css('background', '#cfa');
-				$('#oscore').css('background', '#ebb');
-			}
-			else if ($score['o'] > $score['x']){
-				$('#oscore').css('background', '#cfa');
-				$('#xscore').css('background', '#ebb');
-			}
-			else if ($score['o'] == $score['x']){
-				$('#oscore').css('background', '');
-				$('#xscore').css('background', '');
-			}
-		}
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/mobile.css" media="screen and (max-width: 500px)">
+	<link rel="stylesheet" href="css/desktop.css" media="screen and (min-width: 1024px)">
+	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,100,300">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<script src="">
+		//Download for offline use
+		//jQuery
+		//PeerJs
+		//Fonts
 	</script>
-</head>
 
+	<script src="plugins/peer.js"></script>
+	<script src="plugins/jquery-1.11.0.min.js"></script>
+	<script src="js/main.js"></script>
+
+</head>
 <body>
-	<div style="margin:0px auto; width:800px; padding:10px; text-align:center;">
-		<h1>3T</h1>
-		Your ID: <span id="yid"></span>
-		<p>
-			Opponent ID: <input type="text" id="pid" />
-			<button id="connect">Connect!</button>
-		</p>
-		<div style="position:relative;">
-			<table cellspacing="5px" style="height:400px; width:400px;">
+	<div style="position: relative; line-height: 4em; padding: 3vh 5vmin 2vh 5vmin;">
+		<span style="vertical-align: middle; font-size: 2vw; font-weight: 100;">3T</span>
+		<div style="vertical-align: middle; float: right; display: inline; font-size: 1.3em;">
+			<span id="playersTurn"></span>
+				&nbsp; | &nbsp;
+			<span id="yid"></span>
+				&nbsp; | &nbsp;
+			<span id="ySign"></span>
+		</div>
+	</div>
+	<div style="margin:0px auto; width: 100%; padding:10px 0; text-align:center;">
+		<div id="gameDiv">
+			<table id="gameTable" cellspacing="14px">
 				<tr>
 					<td id="x1y1"></td>
 					<td id="x2y1"></td>
@@ -367,28 +59,47 @@
 			</div>
 		</div>
 	
-			<center>
-			<table style="width:400px; text-align:center;">
-				<tr style="font-family:lolol; font-size:35pt; line-height:30pt;">
-					<td>x</td>
-					<td>o</td>
+		<div id="infoControls">
+			<table border="0" style="width: 50%; font-size: 1.3em; line-height: .3em; text-align: center; table-layout: fixed;">
+				<tr>
+					<td>
+						<img src="images/crossNoShadow.png" style="display: inline; width: 100%;">
+					</td>
+					<td ><span class="fa fa-minus"></span></td>
+					<td>
+						<img src="images/circleNoShadow.png" style="display: inline; width: 100%;">
+					</td>
 				</tr>
 				<tr>
 					<td id="xscore"></td>
+					<td><span class="fa fa-minus"></span></td>
 					<td id="oscore"></td>
 				</tr>
 			</table>
-			
-			<p style="width:400px;">
-				<span id="playersTurn"></span>'s turn!
-				<span style="padding:0px 30px;"></span>
-				<button onClick="resetGame();">ResetGame</button>
+				
+			<p>
+				<input type="text" id="pid" value="player" style="width:calc(90% - (2.5em + 2px))" />
+				<button id="connect" style="width:2.5em; padding: 0 0 0 2px;"><span class="fa fa-chevron-right"></span></button>
 			</p>
-		</center>
+
+			<script>
+				$('#pid').keypress(function(e) {
+					if(e.which == 13){
+						$('#connect').click();
+					}
+				});
+			</script>
+			
+			<!-- 
+				<p>
+					<button onClick="resetGame();">ResetGame</button>
+				</p>
+			-->
+		</div>
 	</div>
 	
 	<a href="https://github.com/P3t3r6/3T">
-		<img style="position: absolute; top: 0; left: 0; border: 0;" src="https://camo.githubusercontent.com/567c3a48d796e2fc06ea80409cc9dd82bf714434/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png">
+		<img style="visibility: hidden; position: absolute; top: 0; left: 0; border: 0;" src="https://camo.githubusercontent.com/567c3a48d796e2fc06ea80409cc9dd82bf714434/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png">
 	</a>
 </body>
 </html>

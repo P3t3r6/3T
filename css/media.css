@@ -1,0 +1,10 @@
+@media screen and (max-width: 500px) {
+	html, body{
+		background: #000;
+	}
+
+	#infoControls{
+		border: 2px solid red !important;
+		width:100vmin !important;
+	}
+}

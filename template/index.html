@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" class="default">
+<head>
+	<meta charset="UTF-8">
+	<title>3T</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/mobile.css" media="screen and (max-width: 500px)">
+	<link rel="stylesheet" href="css/desktop.css" media="screen and (min-width: 1024px)">
+
+	<script src="">
+	//<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,100,300">
+	//<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+		//Download for offline use
+		//jQuery
+		//PeerJs
+		//Fonts
+	</script>
+
+	<script src="plugins/jquery-1.11.0.min.js"></script>
+	<script src="plugins/peer.js"></script>
+	<script src="plugins/html5_qrcode.min.js"></script>
+	<script src="plugins/jsqrcode-combined.min.js"></script>
+	<script src="js/main.js"></script>
+
+	<script>
+		function getCookie(cname) {
+			var name = cname + "=";
+			var ca = document.cookie.split(';');
+			for(var i=0; i<ca.length; i++) {
+				var c = ca[i];
+				while (c.charAt(0)==' ') c = c.substring(1);
+				if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+			}
+			return "";
+		}
+		function setCookie(cname, cvalue, exdays) {
+			var d = new Date();
+			d.setTime(d.getTime() + (exdays*24*60*60*1000));
+			var expires = "expires="+d.toUTCString();
+			document.cookie = cname + "=" + cvalue + "; " + expires;
+		}
+
+		$(function(){
+			colors = ['default', 'dark', 'light', 's1', 's2', 's3'];
+
+			var current = getCookie('theme');
+			if(current == ""){
+				current = 0;
+			} else {
+				$('html').addClass(colors[current]);
+			}
+
+			$('#toggleColor').click(function(){
+				$('html').removeClass(colors[current]);
+				if(current >= colors.length - 1){
+					current = 0;
+				} else {
+					current++;
+				}
+				$('html').addClass(colors[current]);
+				setCookie('theme', current, 365);
+			});
+		});
+	</script>
+</head>
+<body>
+	<section id="toolbar" style="font-size: 1em; text-align: right; position: absolute; width: 100%;">
+		<button style="font-size: 1em;">
+			Connected to <span id="toolbarpid">playerID</span>&nbsp;
+			<span class="material-icons">power_settings_new</span>
+		</button>
+
+		<button id="toggleColor" style="font-size: 1em;"><span class="material-icons">colorize</span></button>
+	</section>
+	<header>
+		<section class="logo visible">
+		3T
+		</section>
+		<!--
+		<section>
+			<div style="border-right: 2px solid currentColor;">Player's turn</div>
+			<div>Your ID</div>
+			<div style="border-left: 2px solid currentColor;">You're</div>
+		</section>
+		-->
+		<section>
+			<div><span id="pSign" style="font-family: '3T'; font-size: .8em; vertical-align: middle;"></span></div>
+			<div><span id="playersTurn"></span></div>
+			<div><span id="yid">ID</span></div>
+			<div><span id="ySign" style="font-family: '3T'; font-size: .8em; vertical-align: middle;"></span></div>
+
+		</section>
+	</header>
+	<main>
+		<div id="gameDiv">
+			<table id="gameTable" cellspacing="14px">
+				<tr>
+					<td id="x1y1"></td>
+					<td id="x2y1"></td>
+					<td id="x3y1"></td>
+				</tr>
+				<tr>
+					<td id="x1y2"></td>
+					<td id="x2y2"></td>
+					<td id="x3y2"></td>
+				</tr>
+				<tr>
+					<td id="x1y3"></td>
+					<td id="x2y3"></td>
+					<td id="x3y3"></td>
+				</tr>
+			</table>
+
+			<div id="msgBoard">
+			</div>
+		</div>
+
+		<p id="connectp" class="visible" style="text-align: center; width: 60%; margin: 0 auto;">
+			<input type="text" id="pid" value="player" style="width:calc(90% - (2.5em + 2px))" />
+			<button id="connect" style="width:2.5em; padding: 0 0 0 2px;"><span class="material-icons">keyboard_arrow_right</span></button>
+		</p>
+		<script>
+			$('#pid').keypress(function(e) {
+				if(e.which == 13){
+					$('#connect').click();
+				}
+			});
+		</script>
+
+		<section class="score">
+			<section>
+				<div style="font-family: '3T';">x</div>
+				<div><span class="material-icons">remove</span></div>
+				<div style="font-family: '3T';">o</div>
+			</section>
+			<section>
+				<div id="xscore"></div>
+				<div><span class="material-icons">remove</span></div>
+				<div id="oscore"></div>
+			</section>
+		</section>
+
+		<!-- QR Reader -->
+		<img id="qrCodeImg" alt="">
+		<div id="reader" style="width:250px;height:250px"></div>
+		<script>
+			qrCodeRead = false;
+
+			$('#reader').html5_qrcode(function(data){
+				// do something when code is read
+				codeRead(data);
+			}, function(error){
+				console.log(error);
+			//show read errors
+			}, function(videoError){
+			//the video stream could be opened
+			});
+
+			function codeRead(d){
+				if(!qrCodeRead){
+					$('#reader').html5_qrcode_stop();
+					$('#pid').val(d);
+					$('#connect').click();
+					qrCodeRead = true;
+				}
+			}
+		</script>
+
+	</main>
+</body>
+</html>
